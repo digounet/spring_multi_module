@@ -9,7 +9,6 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PersonService implements PersonServiceIntf {
@@ -31,7 +30,7 @@ public class PersonService implements PersonServiceIntf {
     public List<Person> listAll() {
         return personRepository.findAll().stream()
                 .map(personMapper::toModel)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -48,8 +47,15 @@ public class PersonService implements PersonServiceIntf {
 
     @Override
     public Person update(Person person) {
-        PersonEntity personEntity = personMapper.toEntity(person);
+
+        var existingPersonOptional = personRepository.findById(person.getId());
+        if (existingPersonOptional.isEmpty()) {
+            return null;
+        }
+
+        var personEntity = personMapper.toEntity(person);
         personEntity = personRepository.save(personEntity);
+
         return personMapper.toModel(personEntity);
     }
 }

@@ -10,10 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class PersonServiceTest {
@@ -53,29 +53,35 @@ class PersonServiceTest {
     }
 
     @Test
-    void shouldFindPersonById() {
-        var personEntity = PersonEntity.builder()
+    void shouldListAllPersons() {
+        var personEntity1 = PersonEntity.builder()
                 .id(1L)
                 .name("John Doe")
                 .gender(GenderEnum.MALE)
                 .build();
 
-        when(personRepository.findById(1L)).thenReturn(Optional.of(personEntity));
+        var personEntity2 = PersonEntity.builder()
+                .id(2L)
+                .name("Jane Doe")
+                .gender(GenderEnum.FEMALE)
+                .build();
 
-        Person result = personService.findById(1L);
+        when(personRepository.findAll()).thenReturn(List.of(personEntity1, personEntity2));
 
-        assertEquals(personEntity.getId(), result.getId());
-        assertEquals(personEntity.getName(), result.getName());
-        assertEquals(personEntity.getGender(), result.getGender());
+        List<Person> result = personService.listAll();
+
+        assertEquals(2, result.size());
+        assertEquals(personEntity1.getId(), result.get(0).getId());
+        assertEquals(personEntity2.getId(), result.get(1).getId());
     }
 
     @Test
-    void shouldReturnNullWhenPersonNotFound() {
-        when(personRepository.findById(1L)).thenReturn(Optional.empty());
+    void shouldReturnNullWhenNoPersons() {
+        when(personRepository.findAll()).thenReturn(List.of());
 
-        Person result = personService.findById(1L);
+        List<Person> result = personService.listAll();
 
-        assertNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -85,5 +91,44 @@ class PersonServiceTest {
         personService.delete(1L);
 
         verify(personRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void shouldUpdatePersonWhenExists() {
+        var person = Person.builder()
+                .id(1L)
+                .name("John Doe Updated")
+                .gender(GenderEnum.MALE)
+                .build();
+
+        var personEntity = PersonEntity.builder()
+                .id(1L)
+                .name("John Doe Updated")
+                .gender(GenderEnum.MALE)
+                .build();
+
+        when(personRepository.findById(1L)).thenReturn(Optional.of(personEntity));
+        when(personRepository.save(any(PersonEntity.class))).thenReturn(personEntity);
+
+        Person result = personService.update(person);
+
+        assertEquals(person.getId(), result.getId());
+        assertEquals(person.getName(), result.getName());
+        assertEquals(person.getGender(), result.getGender());
+    }
+
+    @Test
+    void shouldReturnNullWhenUpdatingNonExistingPerson() {
+        var person = Person.builder()
+                .id(1L)
+                .name("John Doe Updated")
+                .gender(GenderEnum.MALE)
+                .build();
+
+        when(personRepository.findById(1L)).thenReturn(Optional.empty());
+
+        Person result = personService.update(person);
+
+        assertNull(result);
     }
 }

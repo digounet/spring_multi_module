@@ -31,11 +31,9 @@ public class PersonController {
     @GetMapping("/{id}")
     public ResponseEntity<Person> getPersonById(@PathVariable Long id) {
         Person person = personService.findById(id);
-        if (person != null) {
-            return new ResponseEntity<>(person, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return person != null ?
+            ResponseEntity.ok(person) :
+            ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}")

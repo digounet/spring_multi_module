@@ -19,7 +19,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>22</java.version>
 
         <maven.compiler.encoding>UTF8</maven.compiler.encoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -31,12 +31,15 @@
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire.version>3.2.5</maven-surefire.version>
 
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
-        <sonar.language>java</sonar.language>
-        <sonar.projectKey>estudos-exagonal</sonar.projectKey>
         <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.token>sonar-token</sonar.token>
+        <sonar.projectName>Estudos Exagonal</sonar.projectName>
+        <sonar.projectKey>estudos-exagonal</sonar.projectKey>
+        <sonar.sourceEncoding>UTF8</sonar.sourceEncoding>
+        <sonar.excludes>**/maper/*,**/interfaces/*,src/java/test/**,**/entities/*,**/repository/*</sonar.excludes>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/../target/site/${project.artifactId}/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <modules>
@@ -62,9 +65,24 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version>
+        </dependency>
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.sonar</groupId>
+                    <artifactId>sonar-maven3-plugin</artifactId>
+                    <version>10.5.1.90531</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -145,7 +163,7 @@
                         </goals>
                         <configuration>
                             <dataFile>../target/jacoco.exec</dataFile>
-                            <outputDirectory>../target/jacoco-report/${project.artifactId}</outputDirectory>
+                            <outputDirectory>../target/site/${project.artifactId}</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
